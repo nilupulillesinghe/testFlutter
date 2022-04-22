@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:test_flutter/screens/LoginScreen.dart';
+import 'package:test_flutter/service/ServiceLocator.dart';
 
 void main() {
+  setupLocator();
   runApp(MyApp());
 }
 
@@ -22,7 +25,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LoginScreen(),
     );
   }
 }
