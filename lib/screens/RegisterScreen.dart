@@ -349,15 +349,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         generateMd5(_passwordController.value.text));
     if (await _databaseService.checkUsername(userModel)) {
       if (await _databaseService.saveUserDetails(userModel)) {
-        Fluttertoast.showToast(
-            msg: "Successfully Saved.",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.white,
-            textColor: Colors.black45,
-            fontSize: 16.0);
-        changeScreenReplacement(context, DashboardScreen());
+        if(await checkInternet()) {
+          Fluttertoast.showToast(
+              msg: "Successfully Saved.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.white,
+              textColor: Colors.black45,
+              fontSize: 16.0);
+          changeScreenReplacement(context, DashboardScreen());
+        } else{
+          Fluttertoast.showToast(
+              msg: "Internet Not Available.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.white,
+              textColor: Colors.black45,
+              fontSize: 16.0);
+        }
       } else {
         Fluttertoast.showToast(
             msg: "Error.",

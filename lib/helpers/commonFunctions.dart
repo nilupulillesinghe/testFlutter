@@ -7,6 +7,18 @@ String generateMd5(String input) {
   return md5.convert(utf8.encode(input)).toString();
 }
 
+checkInternet() async {
+  try {
+    final result = await InternetAddress.lookup('example.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      return true;
+    }
+  } on SocketException catch (_) {
+    return false;
+  }
+  return false;
+}
+
 Future<ServerResponse>getData(String url) async{
   ServerResponse serverResponse;
   try{

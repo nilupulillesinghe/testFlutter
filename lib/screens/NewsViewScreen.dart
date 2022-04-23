@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_flutter/helpers/screenNavigation.dart';
 import 'package:test_flutter/models/NewsModel.dart';
 import 'package:intl/intl.dart';
+import 'package:test_flutter/widgets/loading.dart';
 
 class NewsViewScreen extends StatefulWidget {
   final NewsModel newsModel;
@@ -24,24 +25,29 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
             children: [
               Column(
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height*0.45,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage("${widget.newsModel.urlToImage}"),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height*0.05,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(MediaQuery.of(context).size.height*0.05),topRight: Radius.circular(MediaQuery.of(context).size.height*0.05)),
-                        color: Colors.white,
-                      ),
-                    ),
+                  Stack(
+                    children: [
+                      Loading(),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height*0.45,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage("${widget.newsModel.urlToImage}"),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height*0.05,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(topLeft: Radius.circular(MediaQuery.of(context).size.height*0.05),topRight: Radius.circular(MediaQuery.of(context).size.height*0.05)),
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height*0.08,),
                   Container(
@@ -52,7 +58,7 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
                         child: ListView(
                           children: [
                             Text(
-                              "${widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content+widget.newsModel.content}",style: TextStyle(fontFamily: 'Nunito',fontSize: 14,fontWeight: FontWeight.w600),
+                              "${widget.newsModel.content}",style: TextStyle(fontFamily: 'Nunito',fontSize: 14,fontWeight: FontWeight.w600),
                             )
                           ],
                         ),
