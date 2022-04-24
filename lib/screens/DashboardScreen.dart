@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:test_flutter/helpers/commonFunctions.dart';
 import 'package:test_flutter/helpers/screenNavigation.dart';
 import 'package:test_flutter/helpers/style.dart';
+import 'package:test_flutter/models/GridDataModel.dart';
 import 'package:test_flutter/models/NewsModel.dart';
 import 'package:test_flutter/models/ServerResponse.dart';
 import 'package:test_flutter/screens/LoginScreen.dart';
@@ -30,14 +31,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int page = 1;
   int sortBy = 0;
 
-  List<String> _tagList = ["Reset","Relevancy","Popularity", "PublishedAt"];
+  List<GridDataModel> _tagList = [
+    GridDataModel(true, "Reset"),
+    GridDataModel(false, "Relevancy"),
+    GridDataModel(false, "Popularity"),
+    GridDataModel(false, "PublishedAt")
+  ];
 
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
 
   @override
   void initState() {
-    _loaddata();
+    _loadData();
     _loadAllNews(page);
     _scrollController.addListener(() {
       if(_scrollController.position.pixels >= _scrollController.position.maxScrollExtent && !_isMainLoading && !_isMax && !_isPagingLoading){
@@ -315,7 +321,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               await _tagCall(index);
                                             },
                                             child: Container(
-                                              decoration: index == 0 ? BoxDecoration(
+                                              decoration: _tagList[index].isSelected ? BoxDecoration(
                                                   borderRadius: BorderRadius.circular(25),
                                                   gradient: LinearGradient(
                                                       begin: Alignment.topLeft,
@@ -340,9 +346,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 15),
                                                 child: Center(
                                                     child: Text(
-                                                      _tagList[index],
+                                                      _tagList[index].name,
                                                       style: TextStyle(
-                                                          color: index == 0 ? Colors.white : Color(0XFF2E0505),
+                                                          color: _tagList[index].isSelected ? Colors.white : Color(0XFF2E0505),
                                                           fontSize: 12,
                                                           fontWeight: FontWeight.w600,
                                                           fontFamily: 'Nunito'),
@@ -502,73 +508,197 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ));
   }
 
-  _loaddata() async {
-    setState(() {
-      _isLoading = true;
+  /// Initiate data load.
+  _loadData() async {
+    bool internetStatus = await checkInternet().catchError((error, stackTrace) {
+      Fluttertoast.showToast(
+          msg: "Please check internet, Connectivity.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+      print("outer: $error");
     });
-    ServerResponse serverResponse = await getData("https://newsapi.org/v2/top-headlines?country=us&apiKey=e820df172d4b4c00b46858d9c43f224f");
+    if(internetStatus){
+      setState(() {
+        _isLoading = true;
+      });
+      ServerResponse serverResponse = await getData("https://newsapi.org/v2/top-headlines?country=us&apiKey=e820df172d4b4c00b46858d9c43f224f").catchError((error, stackTrace) {
+        Fluttertoast.showToast(
+            msg: "Please contact Server Administrator. : ${error}",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.black45,
+            fontSize: 16.0);
+        print("outer: $error");
+      });
 
-    setState(() {
-      topNewsList = List<NewsModel>.from(
-          List<Map<String, dynamic>>.from(jsonDecode(serverResponse.message)['articles'])
-              .map((e) => NewsModel.fromMap(e))
-              .toList());
-      _isLoading = false;
-    });
-  }
-
-  _searchNews(String keyword) async {
-    setState(() {
-      _isMainLoading = true;
-    });
-    String url = "https://newsapi.org/v2/everything?q=" + keyword +"&from=2022-04-23&sortBy=popularity&apiKey=e820df172d4b4c00b46858d9c43f224f";
-    ServerResponse serverResponse = await getData(url);
-
-    setState(() {
-      mainNewsList = List<NewsModel>.from(
-          List<Map<String, dynamic>>.from(jsonDecode(serverResponse.message)['articles'])
-              .map((e) => NewsModel.fromMap(e))
-              .toList());
-      _isMainLoading = false;
-    });
-  }
-
-  _loadAllNews(int page) async {
-    setState(() {
-      if(page == 1) {
-        _isMainLoading = true;
-      }else{
-        _isPagingLoading = true;
-      }
-    });
-
-    String url = "https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com";
-    if(sortBy > 0){
-      url = url +"&sortBy=${_tagList[sortBy].toLowerCase()}";
-    }
-    url = url+ "&page=${page}" +"&apiKey=e820df172d4b4c00b46858d9c43f224f";
-
-    ServerResponse serverResponse = await getData(url);
-
-    setState(() {
-      if(serverResponse.isSuccess) {
-        mainNewsList += List<NewsModel>.from(
-            List<Map<String, dynamic>>.from(
-                jsonDecode(serverResponse.message)['articles'])
+      setState(() {
+        topNewsList = List<NewsModel>.from(
+            List<Map<String, dynamic>>.from(jsonDecode(serverResponse.message)['articles'])
                 .map((e) => NewsModel.fromMap(e))
                 .toList());
-      }else {
-        _isMax = true;
-      }
-      if(page == 1) {
-        _isMainLoading = false;
-      }else{
-        _isPagingLoading = false;
-      }
-    });
+        _isLoading = false;
+      });
+    }else{
+      Fluttertoast.showToast(
+          msg: "Internet Not Available.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+    }
   }
 
+  /// Load news according to keyword.
+  _searchNews(String keyword) async {
+    for(int i = 0; i<_tagList.length;i++){
+      if(i == 0){
+        setState(() {
+          _tagList[i].isSelected = true;
+          sortBy = 0;
+        });
+      }else{
+        setState(() {
+          _tagList[i].isSelected = false;
+        });
+      }
+    }
+    bool internetStatus = await checkInternet().catchError((error, stackTrace) {
+      Fluttertoast.showToast(
+          msg: "Please check internet, Connectivity.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+      print("outer: $error");
+    });
+    if(internetStatus){
+      setState(() {
+        _isMainLoading = true;
+      });
+      String url = "https://newsapi.org/v2/everything?q=" + keyword +"&from=2022-04-23&sortBy=popularity&apiKey=e820df172d4b4c00b46858d9c43f224f";
+      ServerResponse serverResponse = await getData(url).catchError((error, stackTrace) {
+        Fluttertoast.showToast(
+            msg: "Please contact Server Administrator. : ${error}",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.black45,
+            fontSize: 16.0);
+        print("outer: $error");
+      });
+
+      setState(() {
+        mainNewsList = List<NewsModel>.from(
+            List<Map<String, dynamic>>.from(jsonDecode(serverResponse.message)['articles'])
+                .map((e) => NewsModel.fromMap(e))
+                .toList());
+        _isMainLoading = false;
+      });
+    }else{
+      Fluttertoast.showToast(
+          msg: "Internet Not Available.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+    }
+  }
+
+  /// Load news according to passed parameters.
+  _loadAllNews(int page) async {
+    bool internetStatus = await checkInternet().catchError((error, stackTrace) {
+      Fluttertoast.showToast(
+          msg: "Please check internet, Connectivity.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+      print("outer: $error");
+    });
+    if(internetStatus){
+      setState(() {
+        if(page == 1) {
+          _isMainLoading = true;
+        }else{
+          _isPagingLoading = true;
+        }
+      });
+
+      String url = "https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com";
+      if(sortBy > 0){
+        url = url +"&sortBy=${_tagList[sortBy].name.toLowerCase()}";
+      }
+      url = url+ "&page=${page}" +"&apiKey=e820df172d4b4c00b46858d9c43f224f";
+
+      ServerResponse serverResponse = await getData(url).catchError((error, stackTrace) {
+        Fluttertoast.showToast(
+            msg: "Please contact Server Administrator. : ${error}",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.black45,
+            fontSize: 16.0);
+        print("outer: $error");
+      });
+
+      setState(() {
+        if(serverResponse.isSuccess) {
+          mainNewsList += List<NewsModel>.from(
+              List<Map<String, dynamic>>.from(
+                  jsonDecode(serverResponse.message)['articles'])
+                  .map((e) => NewsModel.fromMap(e))
+                  .toList());
+        }else {
+          _isMax = true;
+        }
+        if(page == 1) {
+          _isMainLoading = false;
+        }else{
+          _isPagingLoading = false;
+        }
+      });
+    } else{
+      Fluttertoast.showToast(
+          msg: "Internet Not Available.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+    }
+  }
+
+  /// Tag color change and load data according to selected tag.
   _tagCall(int index) async {
+    _searchController.clear();
+    for(int i = 0; i<_tagList.length;i++){
+      if(i == index){
+        setState(() {
+          _tagList[index].isSelected = true;
+        });
+      }else{
+        setState(() {
+          _tagList[i].isSelected = false;
+        });
+      }
+    }
     if(index == 0){
       setState(() {
         topNewsList = [];
@@ -580,8 +710,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         page = 1;
         sortBy = 0;
       });
-      _searchController.clear();
-      await _loaddata();
+      await _loadData();
       await _loadAllNews(page);
     } else if(index > 0){
       setState(() {
@@ -597,6 +726,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  /// Logout dialog popup.
   _logOutPop() {
     return showDialog(
       context: context,

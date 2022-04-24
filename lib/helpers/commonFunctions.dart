@@ -3,22 +3,25 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:test_flutter/models/ServerResponse.dart';
 
+/// Convert to md5.
 String generateMd5(String input) {
   return md5.convert(utf8.encode(input)).toString();
 }
 
+/// Check internet connectivity status.
 checkInternet() async {
   try {
     final result = await InternetAddress.lookup('example.com');
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       return true;
     }
-  } on SocketException catch (_) {
-    return false;
+  } on SocketException catch (e) {
+    throw SocketException(e.message);
   }
   return false;
 }
 
+/// get data from service.
 Future<ServerResponse>getData(String url) async{
   ServerResponse serverResponse;
   try{
@@ -42,9 +45,8 @@ Future<ServerResponse>getData(String url) async{
       serverResponse = new ServerResponse(false, reply);
       return serverResponse;
     }
-  } catch(Exception){
+  } catch(e){
     print(Exception);
-    serverResponse = new ServerResponse(false, Exception.toString());
-    return serverResponse;
+    throw Exception(e);
   }
 }

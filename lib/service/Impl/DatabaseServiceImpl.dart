@@ -16,6 +16,7 @@ class DatabaseServiceImpl implements DatabaseService {
     // init();
   }
 
+  /// Initiating db connection.
   Future init() async {
     dbPath = (await getDatabasesPath())!;
     path = join(dbPath, "test.db");
@@ -25,17 +26,13 @@ class DatabaseServiceImpl implements DatabaseService {
     if (exist) {
       _db = await openDatabase(path);
       print("dn exists");
-      // ByteData data = await rootBundle.load(join(dbPath,"upKeep.db"));
-      // List<int> bytes = data.buffer.asUint8ClampedList(data.offsetInBytes,data.lengthInBytes);
-      //
-      // String newpath = await ExtStorage.getExternalStoragePublicDirectory(
-      //     ExtStorage.DIRECTORY_DOWNLOADS);
-      // await File(newpath).writeAsBytes(bytes,flush: true);
     } else {
       print("new");
       try {
         await Directory(dirname(path)).create(recursive: true);
-      } catch (_) {}
+      } catch (e) {
+        throw Exception(e);
+      }
       ByteData data = await rootBundle.load(join("assets/db", "test.db"));
       List<int> bytes = data.buffer
           .asUint8ClampedList(data.offsetInBytes, data.lengthInBytes);
@@ -46,6 +43,7 @@ class DatabaseServiceImpl implements DatabaseService {
     }
   }
 
+  /// Save user details to db.
   @override
   Future<bool> saveUserDetails(UserModel userModel) async {
     try {
@@ -54,15 +52,16 @@ class DatabaseServiceImpl implements DatabaseService {
       await _db!.transaction((txn) async {
         await txn.insert("test_user", userModel.toMap());
       });
-    } catch (Exception) {
+    } catch (e) {
       print("Exception");
-      print(Exception);
-      return false;
+      print(e);
+      throw Exception(e);
     }
     print("true");
     return true;
   }
 
+  /// Check username or email exist in db.
   @override
   Future<bool> checkUsername(UserModel userModel) async {
     List<UserModel> list = [];
@@ -90,13 +89,14 @@ class DatabaseServiceImpl implements DatabaseService {
       } else {
         return true;
       }
-    } catch (Exception) {
+    } catch (e) {
       print("Exception");
-      print(Exception);
-      return false;
+      print(e);
+      throw Exception(e);
     }
   }
 
+  /// Validate user from db using username and password.
   @override
   Future<bool> loginValidate(UserModel userModel) async {
     List<UserModel> list = [];
@@ -116,9 +116,6 @@ class DatabaseServiceImpl implements DatabaseService {
         results.forEach((result) {
           UserModel userModel = UserModel.fromMap(result);
           list.add(userModel);
-          print(userModel.test_user_password);
-          print(userModel.test_user_email);
-          print(userModel.test_user_user_name);
         });
       });
 
@@ -127,10 +124,10 @@ class DatabaseServiceImpl implements DatabaseService {
       } else {
         return false;
       }
-    } catch (Exception) {
+    } catch (e) {
       print("Exception");
-      print(Exception);
-      return false;
+      print(e);
+      throw Exception(e);
     }
   }
 }

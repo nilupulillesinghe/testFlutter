@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:test_flutter/helpers/screenNavigation.dart';
 import 'package:test_flutter/models/NewsModel.dart';
 import 'package:intl/intl.dart';
@@ -122,16 +123,28 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
               Positioned(
                 bottom: MediaQuery.of(context).size.height*0.05,
                 right: MediaQuery.of(context).size.width*0.05,
-                child: Container(
-                  width: 55,
-                  height: 55,
-                  decoration: BoxDecoration(
-                      color: Color(0XFFF5F5F5),
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: AssetImage('assets/images/fab.png')
-                      )
+                child: GestureDetector(
+                  onTap: (){
+                    Fluttertoast.showToast(
+                        msg: "Not yet Implemented.",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black45,
+                        fontSize: 16.0);
+                  },
+                  child: Container(
+                    width: 55,
+                    height: 55,
+                    decoration: BoxDecoration(
+                        color: Color(0XFFF5F5F5),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        image: DecorationImage(
+                            fit: BoxFit.fill,
+                            image: AssetImage('assets/images/fab.png')
+                        )
+                    ),
                   ),
                 ),
               ),

@@ -22,6 +22,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _loginFormKey = GlobalKey<FormState>();
 
   @override
+  void dispose() {
+    _userNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     DateTime? _lastPressedAt;
 
@@ -240,14 +247,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 ))));
   }
 
+  /// Login process.
   _signIn() async {
     UserModel userModel = new UserModel(_userNameController.value.text, "",
         generateMd5(_passwordController.value.text));
     print(userModel.test_user_password);
     print(userModel.test_user_email);
     print(userModel.test_user_user_name);
-    if (await _databaseService.loginValidate(userModel)) {
-      if(await checkInternet()){
+    bool status = await _databaseService.loginValidate(userModel).catchError((error, stackTrace) {
+      Fluttertoast.showToast(
+          msg: "Data Error $error.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+      print("outer: $error");
+    });
+    if (status) {
+      bool internetStatus = await checkInternet().catchError((error, stackTrace) {
+        Fluttertoast.showToast(
+            msg: "Please check internet, Connectivity.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.black45,
+            fontSize: 16.0);
+        print("outer: $error");
+      });
+      if(internetStatus) {
         Fluttertoast.showToast(
             msg: "Login success.",
             toastLength: Toast.LENGTH_SHORT,

@@ -24,6 +24,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _registerFormKey = GlobalKey<FormState>();
 
   @override
+  void dispose() {
+    _userNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordRepeatController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
@@ -342,14 +351,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
         )));
   }
 
+  /// Registration process.
   _register() async {
     UserModel userModel = new UserModel(
         _userNameController.value.text,
         _emailController.value.text,
         generateMd5(_passwordController.value.text));
-    if (await _databaseService.checkUsername(userModel)) {
-      if (await _databaseService.saveUserDetails(userModel)) {
-        if(await checkInternet()) {
+    bool usernameStatus = await _databaseService.checkUsername(userModel).catchError((error, stackTrace) {
+      Fluttertoast.showToast(
+          msg: "Data Error $error.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.black45,
+          fontSize: 16.0);
+      print("outer: $error");
+    });
+    if (usernameStatus) {
+      bool saveStatus = await _databaseService.saveUserDetails(userModel).catchError((error, stackTrace) {
+        Fluttertoast.showToast(
+            msg: "Data Error $error.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.black45,
+            fontSize: 16.0);
+        print("outer: $error");
+      });
+      if (saveStatus) {
+        bool internetStatus = await checkInternet().catchError((error, stackTrace) {
+          Fluttertoast.showToast(
+              msg: "Please check internet, Connectivity.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.white,
+              textColor: Colors.black45,
+              fontSize: 16.0);
+          print("outer: $error");
+        });
+        if(internetStatus) {
           Fluttertoast.showToast(
               msg: "Successfully Saved.",
               toastLength: Toast.LENGTH_SHORT,
