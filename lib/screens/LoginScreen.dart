@@ -8,6 +8,7 @@ import 'package:test_flutter/screens/DashboardScreen.dart';
 import 'package:test_flutter/screens/RegisterScreen.dart';
 import 'package:test_flutter/service/DatabaseService.dart';
 import 'package:test_flutter/service/Impl/DatabaseServiceImpl.dart';
+import 'package:test_flutter/service/ServiceLocator.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -15,11 +16,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  DatabaseService _databaseService = new DatabaseServiceImpl();
+  late DatabaseService _databaseService;
 
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    _databaseService = locator<DatabaseServiceImpl>();
+    super.initState();
+  }
 
   @override
   void dispose() {
