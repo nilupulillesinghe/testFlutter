@@ -125,6 +125,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         style: TextStyle(
                                           fontSize: MediaQuery.of(context).size.width * 0.04,
                                           color: Color(0XFF818181),
+                                            fontFamily: 'Nunito',
+                                            fontWeight: FontWeight.w600
                                         ),
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
