@@ -75,6 +75,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "N",
+                                      style: TextStyle(
+                                          color: primaryColor,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: MediaQuery.of(context).size.height*0.15,
+                                          fontFamily: 'Nunito'),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height*0.12,
+                                  ),
+                                  Container(
                                     alignment: Alignment.bottomLeft,
                                     child: Text(
                                       "SignIn",
@@ -222,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: MediaQuery.of(context).size.height * 0.25,
+                                    height: MediaQuery.of(context).size.height * 0.15,
                                   ),
                                   Container(
                                     alignment: Alignment.topRight,
