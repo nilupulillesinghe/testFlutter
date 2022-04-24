@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:test_flutter/exception/userException.dart';
 import 'package:test_flutter/models/UserModel.dart';
 import 'package:test_flutter/service/DatabaseService.dart';
 import 'package:path/path.dart';
@@ -122,12 +123,13 @@ class DatabaseServiceImpl implements DatabaseService {
       if (list != null && list.length > 0) {
         return true;
       } else {
+        throw new UserException("Login Details incorrect or not a registered user..").toString();
         return false;
       }
-    } catch (e) {
+    } catch (UserException) {
       print("Exception");
-      print(e);
-      throw Exception(e);
+      print(UserException);
+      throw Exception(UserException.toString());
     }
   }
 }

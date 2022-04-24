@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
     print(userModel.test_user_user_name);
     bool status = await _databaseService.loginValidate(userModel).catchError((error, stackTrace) {
       Fluttertoast.showToast(
-          msg: "Data Error $error.",
+          msg: "${error.message}",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
